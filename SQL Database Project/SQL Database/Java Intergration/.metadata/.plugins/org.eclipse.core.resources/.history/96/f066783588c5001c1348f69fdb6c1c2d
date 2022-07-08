@@ -1,0 +1,12 @@
+import javax.swing.JPanel;
+
+public class button_testing extends JPanel {
+
+	/**
+	 * Create the panel.
+	 */
+	public button_testing() {
+
+	}
+
+}

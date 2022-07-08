@@ -1,0 +1,68 @@
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JTextField;
+import javax.swing.JButton;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+public class Startup extends JFrame {
+
+	private JPanel contentPane;
+	private final JTextField textField = new JTextField();
+	private final JButton btnNewButton = new JButton("New button");
+	private final JTextField textField_1 = new JTextField();
+	jdbc_test hello = new jdbc_test();
+	
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					Startup frame = new Startup();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public Startup() {
+		textField_1.setBounds(67, 116, 86, 20);
+		textField_1.setColumns(10);
+		textField.setBounds(10, 78, 210, 20);
+		textField.setColumns(10);
+		initGUI();
+	}
+	private void initGUI() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 450, 300);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		contentPane.add(textField);
+		btnNewButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				hello.user_login();
+			}
+		});
+		btnNewButton.setBounds(67, 174, 89, 23);
+		
+		contentPane.add(btnNewButton);
+		
+		contentPane.add(textField_1);
+	}
+}

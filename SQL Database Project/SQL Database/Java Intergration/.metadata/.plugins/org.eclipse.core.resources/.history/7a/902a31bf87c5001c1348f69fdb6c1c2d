@@ -1,0 +1,12 @@
+import javax.swing.JPanel;
+
+public class testing extends JPanel {
+
+	/**
+	 * Create the panel.
+	 */
+	public testing() {
+
+	}
+
+}

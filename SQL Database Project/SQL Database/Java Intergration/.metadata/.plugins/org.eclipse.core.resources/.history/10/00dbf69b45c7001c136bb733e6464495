@@ -1,0 +1,68 @@
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+
+public class Orders extends JFrame {
+	private final JTable table_1 = new JTable();
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					Orders frame = new Orders();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public Orders() {
+		initGUI();
+	}
+	private void initGUI() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 450, 300);
+		
+		List<String> columns = new ArrayList<String>();
+		columns.add("Package_id");
+		columns.add("Last_distro_id");
+		columns.add("Shipping_adress");
+		columns.add("Shipping_City");
+		columns.add("Shipping_Zip");
+		columns.add("Shipping_country");
+		columns.add("Out_for_del");
+		columns.add("status");
+		
+		
+		List<String[]> values = new ArrayList<String[]>();
+
+		 for (int i = 0; i < 100; i++) {
+	            values.add(new String[] {"val"+i+" col1","val"+i+" col2","val"+i+" col3"});
+	        }
+	      TableModel tableModel = new DefaultTableModel(values.toArray(new Object[][] {}), columns.toArray());
+	      JTable table = new JTable(tableModel);
+	      table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+	      table.setFillsViewportHeight(true);
+		table_1.setBounds(81, 10, 309, 115);
+		
+		
+	}
+}

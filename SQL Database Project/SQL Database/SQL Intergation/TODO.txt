@@ -1,0 +1,6 @@
+1. Get Relations and database all set.
+	1.1 - Not sure how complex, but I think a good base has been achived.
+2. Get JDBC working
+	2.1 - At this point, I can't get JDBC working at all, I have the example code from professor, but am getting compliation errors. I emailed the professor about it.
+3. Dev interface/website
+	3.1 - While I think an interface would be much easier, I think we might have to do a basic website, and maybe an application as well.
