@@ -1,0 +1,49 @@
+name:       cs340mp5
+
+# By signing below, I pledge on my honor that I neither gave nor received any
+# unauthorized assistance on the code contained in this repository.
+
+author:     "Gabriel Johnson"      # your name
+maintainer: "gjohnson7@hawk.iit.edu"  # your IIT email
+
+dependencies:
+- base >= 4.7 && < 5
+- hspec
+- HUnit
+- HUnit-approx
+- QuickCheck
+- mtl
+- array
+- deepseq
+- random
+- random-shuffle
+- split
+- text
+- bytestring
+- containers
+- ansi-terminal
+
+executables:
+  mp5:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - cs340mp5
+
+library:
+  source-dirs: src
+
+tests:
+  mp5-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - cs340mp5
