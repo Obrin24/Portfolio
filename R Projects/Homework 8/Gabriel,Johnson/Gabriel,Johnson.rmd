@@ -1,0 +1,223 @@
+---
+title: "CS 422 Homework 8"
+author: "Gabriel Johnson, Artificial Intelligence Undergraduate"
+output:
+  html_document:
+    toc: yes
+    df_print: paged
+  html_notebook:
+    toc: yes
+    toc_float: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r}
+library(cluster)
+library(factoextra)
+library(dplyr)
+library(readr)
+library(dbscan)
+library(fpc)
+```
+
+### Part 2.1-a-i
+
+Out of all the attributes that should be removed the Names attribute
+should be. Since it doesn't play any value in the clustering of the
+data, along with that it is unique and isn't useful for unsupervised
+data analysis.
+
+### Part 2.1-a-ii
+
+The data being standardized helps with understanding what attributes
+that are closely related are clustered together.
+
+### Part 2.1-a-iii
+
+```{r}
+rm(list=ls())
+options(digits=2)
+# Set working directory as needed
+setwd("C:/Users/gabeb/Desktop/programming/CS 422 Homework/Gabriel,Johnson")
+
+data <- read.delim(file="file19.txt", sep=",", comment.char="#", header = TRUE)
+# Seed the PRNG
+set.seed(123)
+```
+
+### Part 2.1-b-i
+
+```{r}
+data.scaled <- scale(select(data,-Name))
+
+fviz_nbclust(data.scaled, kmeans, method = "silhouette") + labs(subtitle = "Silhouette method")
+
+fviz_nbclust(data.scaled, kmeans, method = "wss") +
+    geom_vline(xintercept = 4, linetype = 2)+
+  labs(subtitle = "Elbow method")
+
+```
+
+### Part 2.1-b-ii
+
+```{r}
+kms.scaled <- kmeans(data.scaled, 4)
+
+x <- fviz_cluster(kms.scaled, select(data,-Name), main="Scaled clusters")
+
+plot(x)
+
+
+```
+
+### Part 2.1-b-iii
+
+```{r}
+
+kms.scaled$size
+
+```
+
+The following clusters have the following points: Cluster 1: 20 Cluster
+2: 20 Cluster 3: 9 Cluster 4: 17
+
+### Part 2.1-b-iv
+
+```{r}
+
+kms.scaled$totss
+
+```
+
+The total SSE of the clusters is 520.
+
+### Part 2.1-b-v
+
+```{r}
+
+kms.scaled$withinss
+
+```
+
+The following clusters have the following SSE: Cluster 1: 58.9 Cluster
+2: 31.5 Cluster 3: 6.3 Cluster 4: 38.6
+
+### Part 2.1-b-vi
+
+```{r}
+
+clust1 <- which(kms.scaled$cluster == 1)
+clust2 <- which(kms.scaled$cluster == 2)
+clust3 <- which(kms.scaled$cluster == 3)
+clust4 <- which(kms.scaled$cluster == 4)
+
+
+clust1Data <- data[clust1,]
+clust1Data <- select(clust1Data,Name)
+clust2Data <- data[clust2,]
+clust2Data <- select(clust2Data,Name)
+clust3Data <- data[clust3,]
+clust3Data <- select(clust3Data,Name)
+clust4Data <- data[clust4,]
+clust4Data <- select(clust4Data,Name)
+
+```
+
+```{r}
+
+clust1Data
+
+clust2Data
+
+clust3Data
+
+clust4Data
+```
+
+According to the data above the clusters are somewhat close together to animals in the animal kingdom, for instance the first cluster compiles of rodent like creatures. While the second cluster is more all over the place showing that more clusters are needed. The third cluster is more accurate since it compiles of bigger land forest/plains mammals. Then finally the 4th cluster also feels like it should be broken up more since it lumped bats with moles which work based on senses but not what they would eat.
+
+### Part 2.2-a
+
+```{r}
+df <- read.csv("s1.csv")
+```
+
+### Part 2.2-b-i
+
+```{r}
+plot(df)
+```
+
+### Part 2.2-b-ii
+
+In the data set I see 15 different clusters, there are a couple that
+aren't around the dense clusters however these clusters are pretty
+identifiable and well-separated.
+
+### Part 2.2-c-i
+
+```{r}
+df.scaled <- scale(df)
+
+fviz_nbclust(df.scaled, kmeans, method = "wss")
+
+```
+
+### Part 2.2-c-ii
+
+```{r}
+
+fviz_nbclust(df.scaled, kmeans, method = "silhouette")
+
+```
+
+### Part 2.2-c-iii
+
+I think that 10 would be better since it is closer to the original 15
+number clusters. Therefore, the 10 clusters would allow kmeans to
+cluster the data more accurately.
+
+### Part 2.2-d-i
+
+```{r}
+
+kms.scaled2 <- kmeans(df.scaled, 10)
+
+x <- fviz_cluster(kms.scaled2, df, main="Scaled clusters")
+
+plot(x)
+
+```
+
+### Part 2.2-d-ii
+
+Kmeans clustered the data in a way in which puts a majority of the
+original clusters in their own clusters. However it is including some of
+the clusters with other clusters. Also it is having a difficult time
+with the outlier points from the dense clusters making the clusters
+overlap.
+
+### Part 2.2-e-i
+
+The amount of MinPts should be greater than the dimension of the data.
+Therefore the equation for this is 2\*dim. 2 is the dimensions of the
+data so 4 is the minPts.
+
+### Part 2.2-e-ii
+
+```{r}
+dim(df)
+
+kNNdistplot(df, k=4)
+
+
+set.seed(220)
+Dbscan_cl <- dbscan(df, eps = 20000, MinPts = 4)
+
+fviz_cluster(Dbscan_cl, df, geom = "point")
+
+cat("At minPts =", Dbscan_cl$MinPts, ", eps =", Dbscan_cl$eps, ", there are" , max(Dbscan_cl$cluster) , "clusters.")
+
+```

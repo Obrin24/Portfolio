@@ -1,0 +1,187 @@
+---
+title: "CS 422"
+author: "Gabriel Johnson, Artificial Intelligence Undergraduate"
+output:
+  html_document:
+    toc: yes
+    df_print: paged
+  html_notebook:
+    toc: yes
+    toc_float: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+### Part 2.1
+
+```{r}
+library(dplyr)
+library(psych)
+library(rpart)
+library(rpart.plot)
+library(caret)
+library(ROCR)
+
+options("digits"=3)
+```
+
+### Part 2.1-a
+
+```{r}
+test.df <- read.csv('adult-test.csv', comment.char = "#")
+train.df <- read.csv('adult-train.csv', comment.char = "#") 
+
+x1 <- which(train.df$occupation== "?")
+x2 <- which(train.df$native_country == "?")
+x3 <- which(train.df$workclass == "?")
+x4 <- c(x1,x2,x3)
+train.df <- train.df[-x4,]
+
+y1 <- which(test.df$occupation== "?")
+y2 <- which(test.df$native_country == "?")
+y3 <- which(test.df$workclass == "?")
+y4 <- c(y1,y2,y3)
+test.df <- test.df[-y4,]
+
+
+```
+
+### Part 2.1-b
+
+```{r}
+set.seed(1122)
+model <- rpart(income ~., data = train.df)
+rpart.plot(model, extra=104, fallen.leaves=T, type=4, main="US Census Training Dataset Decision Tree")
+```
+
+### Part 2.1-b.i
+
+The top three most important predictors of the model is the relationship
+attribute, capital_gain attribute and the education attribute according
+to the decision tree above.
+
+### Part 2.1-b.ii
+
+The first split is on the relationship predictor, and the predicted
+class of the root node is "<=50K" since that has the most observations
+compared to the ">50K" class. The distribution between the classes is
+.75 to .25, which are the classes "<=50K" and ">50K" respectfully.
+
+### Part 2.1-c
+
+```{r}
+predicted <- predict(model,test.df,type="class")
+confMatrix <- confusionMatrix(predicted,as.factor(test.df[,15]))
+confMatrix
+```
+
+### Part 2.1-c.i
+
+The balance accuracy of the model according to the Confusion Matrix is
+0.726. Which is the average of the Sensitivity and Specificity, which
+both are 0.984 and 0.504. 
+
+### Part 2.1-c.ii 
+
+The balanced error rate of
+the model is calculated with the following equation, 1 - balanced
+accuracy. So the balanced error rate would be 1-0.726 which equals
+0.274. 
+
+### Part 2.1-c.iii 
+
+The sensitivity of the model is 0.948
+according to the confusion matrix and its statistics. While the
+specificity of the model is 0.504 which is also pulled from the
+confusion matrix and its computed statistics. 
+
+### Part 2.1-c.iv
+
+```{r}
+pred.rocr <- predict(model, newdata=test.df, type="prob")[,2]
+f.pred <- prediction(pred.rocr, test.df$income)
+f.perf <- performance(f.pred, "tpr", "fpr")
+plot(f.perf, colorize=T, lwd=3)
+abline(0,1)
+auc <- performance(f.pred, measure = "auc")
+auc@y.values[[1]]
+```
+
+### Part 2.1-d
+
+```{r}
+printcp(model, digits = 3)
+model$cptable[which.min(model$cptable[,"xerror"]),"CP"]
+```
+
+Yes the model needs to be pruned and it can be pruned at the level of
+0.01 which was pulled from the cp table which tells us the lowest cp
+value is 0.01.
+
+### Part 2.1-e
+
+```{r}
+set.seed(1122)
+c <- data.frame(count(train.df,income))
+c
+```
+
+### Part 2.1-e.i
+
+In the training data set there are 22653 observations with the class of
+"\<=50K" and 7508 observations with the "\<50K" class. 
+
+### Part 2.1-e.ii
+
+```{r}
+lessthan <- which(train.df$income == "<=50K")
+greaterthan <- which(train.df$income == ">50K")
+downsample <- (sample(lessthan,length(greaterthan)))
+train2.df <- train.df[c(downsample,greaterthan),]
+```
+
+### Part 2.1-e.iii
+
+```{r}
+model2 <- rpart(income ~., data = train2.df)
+pred <- predict(model2, test.df, type="class")
+confusionMatrix(pred,as.factor(test.df[,15]))
+```
+
+### Part 2.1-e.iii_i
+
+The balanced accuracy of this model, according to the above it is 0.805
+
+### Part 2.1-e.iii_ii
+
+The balanced error rate is equivalent to 1 - the balanced accuracy which
+is equal to 1 - 0.805 = 0.195 
+
+### Part 2.1-e.iii_iii 
+
+The sensitivity of the model, according to the confusion matrix is 0.773 and the
+specificity of the model is 0.838. 
+
+### Part 2.1-e.iii_iv
+
+```{r}
+pred.rocr2 <- predict(model2, newdata=test.df, type="prob")[,2]
+f.pred2 <- prediction(pred.rocr2, test.df$income)
+f.perf2 <- performance(f.pred2, "tpr", "fpr")
+plot(f.perf2, colorize=T, lwd=3)
+abline(0,1)
+auc2 <- performance(f.pred2, measure = "auc")
+auc2@y.values[[1]]
+```
+
+### Part 2.1-f
+
+The difference between the two models in terms of balanced accuracy,
+sensitivity, specificity, positive predictive value and AUC shows that
+model two how a better balanced accuracy, along with a better AUC,
+positive predictive values and specificity. But the sensitivity of model
+used in c is higher. Which shows that the first model is more sensitive
+to data and therefore isn't as balanced or accurate compared to the
+second model which has a lower amount of sensitivity but has better
+accuracy with prediction.

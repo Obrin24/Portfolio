@@ -1,0 +1,97 @@
+---
+  title: "Homework 6, Problem 1"
+output: 
+  html_notebook:
+  toc: yes
+toc_float: yes
+author: Gabriel Johnson
+---
+  
+rm(list=ls())
+
+# Set working directory as needed
+```{r}
+library(dplyr)
+library(rgl)
+library(caret)
+setwd("C:/Users/gabeb/Desktop/programming/CS 422 Homework/Gabriel,Johnson")
+pts <- read.csv("perceptron.csv")
+pts <- as.matrix(pts)
+
+```
+# The Perceptron function
+#
+# PARAMETERS:
+# points: The dataset that is to be separated
+# lamda:  The learning rate
+# gamma:  The error threshold
+#
+# RETURNS
+# A list containing three named elements.  The elements
+# should be named: 
+# "weights" - Contains the final weight vector (learned weights)
+# "epochs"  - Number of epochs it took to converge
+# "error"   - A vector of error calculated at the end of each epoch
+
+```{r}
+perceptron <- function(points, lamda, gamma) {
+  w <- c(-gamma, runif(ncol(points) - 2))
+  n <- nrow(points)
+  label <- points[ , 1]
+  obs <- points[ , 2:ncol(points)]
+  misclassfied <- TRUE
+  epochs <- 0
+  error <- c()
+  error2 <- c()
+  mse = lamda * 2
+  while (misclassfied) {
+    mse = 0
+    misclassfied <- FALSE
+    for (i in 1:n) {
+      if (label[i] * my_sign(obs[i , ], w) <= 0) {
+        w <- w - lamda * (my_sign(obs[i , ], w) - label[i]) * obs[i , ]
+        misclassfied <- TRUE
+        err <- (((my_sign(obs[i,], w) - label[i])))
+        error <- c(error, err)
+      }
+      epochs <- epochs + 1
+      err2 <- sum(error)/n
+      error2 <- c(error2,err2)
+      error <- c()
+    }
+  }
+  return(list(weights = w,epochs = epochs,error = error2))
+}
+```
+# The sign function, this is the prediction function
+# PARAMETERS:
+# x : The X vector (input that needs to be predicted)
+# weights: The weight vector
+# RETURNS:
+# -1 or 1
+```{r}
+my_sign <- function(x, weights) {
+  net <- (sign(x %*% weights))
+  return( net )
+}
+Plot2D <- function(points, a, b) {
+  plot(points[, 3:4], xlab = "X", ylab = "Y",
+       pch = ifelse(points[, 1] == 1, 2, 8),
+       col = ifelse(points[, 1] == 1, "blue", "red"))
+  abline(a, b)
+}
+```
+# MAIN ENTRY POINT
+```{r}
+objlist <- perceptron(pts,0.5,0.01)
+e <- unlist(objlist[1])
+epochs <- unlist(objlist[2])
+errors <- unlist(objlist[3])
+Plot2D(pts, -e[1]/e[3], -e[2]/ e[3])
+```
+```{r}
+plot((1:epochs),errors,type = "l",col = "red", xlab = "Epochs",ylab = "Error Rate", main = "Perceptron Training Error")
+```
+
+
+

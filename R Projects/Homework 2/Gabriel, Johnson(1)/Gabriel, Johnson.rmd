@@ -1,0 +1,150 @@
+---
+title: "CS 422"
+author: "Gabriel Johnson, Artificial Intelligence Undergraduate"
+output:
+  html_document:
+    toc: yes
+    df_print: paged
+  html_notebook:
+    toc: yes
+    toc_float: yes
+---
+
+
+### Part 2.1
+
+```{r}
+library(dplyr)
+library(psych)
+library(ISLR)
+library(Metrics)
+library(olsrr)
+
+set.seed(1122)
+index <- sample(1:nrow(Auto), 0.95*dim(Auto)[1])
+train.df <- Auto[index,]
+test.df <- Auto[-index, ]
+
+```
+
+### Part 2.1-a.
+
+```{r}
+no_names <- select(train.df,-name)
+model <- lm(mpg ~ ., data=no_names)
+print(model)
+
+```
+
+### Part 2.1-a.i
+The name of the car doesn't impact the millage the car gets per gallon. Compared to how the other predictors does like how many cylinders the car has. It makes the data less biased as well since it is the raw data instead of tied to a name.
+
+### Part 2.1-a.ii
+
+```{r}
+summary <- summary(model)
+###ols_regress(model, data = no_names)
+r_squared <- summary$r.squared
+adj_rval <- summary$adj.r.squared
+res_error <- summary$sigma
+predict <- predict(model,no_names)
+rmse2 <- sqrt (res_error^2)
+cat(paste0("R-sq value is ",  round(r_squared, digits = 2)),paste0("\nAdjusted R-sq value is ",  round(adj_rval, digits = 2)),paste0("\nRSE is ", round(res_error, digits = 2)),paste0("\nRMSE is ", rmse2))
+```
+### Part 2.1-a.iii
+
+```{r}
+res <- resid(model)
+ols_plot_resid_fit(model)
+```
+### Part 2.1-a.i.v
+```{r}
+ols_plot_resid_hist(model)
+
+```
+The following Histogram for the residuals of the Model with the density of the model is roughly like a Gaussian distribution, this is because of the bell curve which can be traced along the rising bars on the histogram.Both sides of the histogram are roughly equal in distribution with more of a tail on the right, but the main values are in the middle which follows the normal Gaussian bell curve.The distribution is weighted heavily on the middle of the graph around a residual between positive and negative -2. Which means that those values have a closer to zero meaning that the fit is more consistant with those attributes when being compared to the mpg of the training data.
+
+### Part 2.1-b.i
+```{r}
+anova(model)
+signif <- select(train.df,-name & -horsepower & -acceleration & -origin & -year)
+model_2 <- lm(mpg ~.,signif)
+print(model_2)
+```
+```{r}
+pairs.panels(no_names)
+```
+### Part 2.1-b.ii
+```{r}
+summary2 <- summary(model_2)
+r_squared2 <- summary2$r.squared
+adj_rval2 <- summary2$adj.r.squared
+res_error2 <- summary2$sigma
+rmse <- sqrt (res_error2^2)
+cat(paste0("R-sq value is ",  r_squared2),paste0("\nAdjusted R-sq value is ",  adj_rval2),paste0("\nRSE is ", res_error),paste0("\nRMSE is ", rmse))
+```
+
+### Part 2.1-b.iii
+
+```{r}
+res2 <- resid(model_2)
+ols_plot_resid_fit(model_2)
+```
+### Part 2.1-b.i.v
+```{r}
+ols_plot_resid_hist(model_2)
+
+```
+The following Histogram for the residuals of the Model with the density of the model is roughly like a Gaussian distribution, this is because of the bell curve which can be traced along the rising bars on the histogram.Both sides of the histogram are roughly equal in distribution with more of a tail on the right, but the main values are in the middle which follows the normal Gaussian bell curve. Like the prior histogram the focus is on the center of the graph but there is more difference in the residuals range, with it being from -15 to 20 compared to the prior -10 to beyond 10. But in this histogram there is less data being compared, along with that the residuals are more compact compared to before, a vast majority of them being really close to zero compared to the wider range of variance in the prior histogram. Meaning the data being displayed here has a better fit.
+
+### Part 2.1-b.i.v
+Comparing the data from both models, I believe the data from model 2 is better since it uses the data in which is the most correlated attributes with the mpg attribute. Model 2 has better compression of residuals and less variance in data meaning that the data is a better fit and has more correlation, but when comparing the R squared values of both models the first model has a higher r squared meaning that that data has a better fit then model 2 which has a lower r squared value.
+
+### Part 2.1-c
+```{r}
+mod <- lm(mpg~. , Auto)
+preddd <- predict(mod,test.df)
+preddd <- preddd[1:20]
+match.df <- data.frame(Predicted = preddd)
+
+```
+
+### Part 2.1-d
+```{r}
+pred <- predict.lm(model_2,test.df,interval="confidence", level = 0.95)
+match.df <- data.frame(match.df, pred)
+colnames(match.df) <- c("Predicted","Response","Lower","Upper")
+match.df$Matches <- ifelse(match.df$Response %in% match.df$Predicted, 1,0)
+match.df <- round(match.df,digits=2)
+n_matches <- lapply(match.df[5],sum)
+match.df
+```
+```{r}
+print(paste0("Total observations correctly predicted: ", n_matches))
+```
+
+
+### Part 2.1-e
+```{r}
+mod <- select(test.df,mpg)
+match2.df <- data.frame(mod)
+pred2 <- predict(model_2,test.df,interval="prediction")
+match2.df <- data.frame(match2.df, pred2)
+colnames(match2.df) <- c("Predicted","Response","Lower","Upper")
+match2.df$Matches <- ifelse(match2.df$Predicted %in% match2.df$Response, 1,0)
+match2.df <- round(match2.df,digits=2)
+n_matches <- lapply(match2.df[5],sum)
+match2.df
+```
+````{r}
+print(paste0("Total observations correctly predicted: ", n_matches))
+```
+
+### Part 2.1-f
+What was expected due to the fact that the prediction interval has a higher chance of having more matches due to its wider net.
+
+### Part 2.1-f.i
+The prediction interval had more matches.
+
+### Part 2.1-f.ii
+The prediction level has a wider range in which is checks for meaning that it would have more matches then the confidence level does.Since the prediction level tries find a response based on the uncertainty of what can happen. Making it so that it would have more matches due to its wider net.

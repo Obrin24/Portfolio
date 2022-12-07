@@ -1,0 +1,27 @@
+---
+title: "CS 422"
+author: "Gabriel Johnson, Artificial Intelligence Undergraduate"
+output:
+  html_document:
+    toc: yes
+    df_print: paged
+  html_notebook:
+    toc: yes
+    toc_float: yes
+---
+
+
+### Part 1.1
+
+```{r}
+library(dplyr)
+library(psych)
+library(rpart)
+library(rpart.plot)
+
+iris.df <- data.frame(iris)
+model <- rpart(Species ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris.df)
+
+rpart.plot(model, extra=104, fallen.leaves=T, type=4, main="Iris Dataset Decision Tree")
+
+```

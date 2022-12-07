@@ -1,0 +1,211 @@
+---
+  title: "Homework 7"
+output: 
+  html_document:
+    toc: yes
+    df_print: paged
+  html_notebook:
+    toc: yes
+    toc_float: yes
+---
+```{r}  
+library(keras)
+library(dplyr)
+library(caret)
+library(rpart)
+library(rpart.plot)
+
+rm(list=ls())
+options(digits=2)
+# Set working directory as needed
+setwd("C:/Users/gabeb/Desktop/programming/CS 422 Homework/Gabriel,Johnson")
+
+df <- read.csv("wifi_localization.csv")
+
+# Seed the PRNG
+set.seed(1122)
+df <- df[sample(nrow(df)), ] # Shuffle, as all of the data in the .csv file
+                             # is ordered by label!  
+```
+### 2.1-a
+```{r}
+indx <- sample(1:nrow(df), 0.20*nrow(df))
+test.df  <- df[indx, ]
+train.df <- df[-indx, ]
+
+model <- rpart(room ~.,method="class", data = train.df)
+#rpart.plot(model, fallen.leaves=T, type=2, main="Wifi Room Decision Model")
+
+predicted <- predict(model,test.df,type="class")
+confMatrix <- confusionMatrix(predicted,as.factor(test.df[,8]))
+confMatrix
+x <- confMatrix[["byClass"]]
+sensitivity <- x[1:4]
+specificity <- x[5:8]
+ppv <- x[9:12]
+Bal_acc <- x[41:44]
+accuracy <- confMatrix$overall['Accuracy']
+
+cat("      Decision Tree Model \n\t Overall accuracy:", accuracy, "\n\t Sensitivity Class 1: ", sensitivity[1], "  Class 2:", sensitivity[2], "\n\t             Class 3:", sensitivity[3], "Class 4:", sensitivity[4], "\n\t Specificity Class 1:", specificity[1], "Class 2:", specificity[2], "\n\t\             Class 3:", specificity[3], "Class 4:", specificity[4],"\n\t PPV \t     Class 1:", ppv[1], "Class 2:", ppv[2], "\n\t             Class3: ", ppv[3], "Class 4:", ppv[4], "\n\t Bal. Acc.   Class 1:", Bal_acc[1], "Class 2:", Bal_acc[2], "\n\t             Class 3:", Bal_acc[3], "Class 4:", Bal_acc[4])
+```
+...
+
+# (b)
+# Note that in (b) either use a new variable to store the model, or null out
+# the variable that stored the model in (a) if you want to reuse that variable.
+# The reason is that if you don't null it out, the model in (b) will have
+# residual information left over from (a) and your results will not be quite
+# accurate.
+
+```{r}
+
+
+df2 <- df
+
+
+df2$label <- rep(0, nrow(df2))
+df2$label[df2$room == "2"] <- 1
+df2$label[df2$room == "3"] <- 2
+df2$label[df2$room == "4"] <- 3
+
+df2$room <- NULL
+
+set.seed(1122)
+
+test2.df  <- df2[indx, ]
+train2.df <- df2[-indx, ]
+
+X_train <- select(train2.df, -label)
+y_train <- train2.df$label
+
+y_train.ohe <- to_categorical(y_train)
+
+X_test <- select(test2.df, -label)
+y_test <- test2.df$label
+y_test.ohe <- to_categorical(test2.df$label)
+
+
+model2 <- keras_model_sequential() %>%
+  layer_dense(units = 1, activation="relu", input_shape=c(7)) %>%
+  layer_dense(units = 4, activation="softmax")
+
+model2 
+
+model2 %>% compile(
+  optimizer = 'adam', 
+  loss = 'categorical_crossentropy',
+  metrics = c('accuracy'))
+
+model2 %>% fit(
+  data.matrix(X_train), 
+  y_train.ohe,
+  epochs=100,
+  batch_size=32,
+  validation_split=0.20
+)
+
+mod <- model2 %>% evaluate(as.matrix(X_test), y_test.ohe)
+loss <- mod[1]
+accuracy2 <- mod[2]
+
+pred.prob <- predict(model2, as.matrix(X_test))
+pred.class <- apply(pred.prob, 1, function(x) which.max(x)-1) 
+
+confMatrix2 <- confusionMatrix(as.factor(pred.class), as.factor(y_test))
+confMatrix2
+
+```
+### 2.1-b-i
+```{r}
+
+cat(" For one neuron in hidden layer, loss: ", loss , ", Accuracy: ", accuracy2)
+```
+
+### 2.1-b-ii
+
+The accuracy is low since it doesn't have enough hidden layer activation functions to provide a better way to augment the weights. This is currently similar to a perceptron instead of an ANN because of the limited neurons.
+
+### 2.1-b-iii
+```{r}
+pred.class
+
+```
+The pattern in which I see in the predicted labels is that a majority of the classes are still zeros, it seems to have the pattern of starting with at least zero. 
+
+### 2.1-b-iV
+
+I think the model has high bias since it doesn't have the ability do accurately predict the classes with one neuron so in order to predict the classes it has to depend on a high bias on the default label of 0.
+
+### 2.1-b-v
+
+I believe that it would make slight changes in the neural network and it would be less bias, however with the limit of one hidden layer neuron it is limited to that neuron, therefore it will get to a point where nothing can change to better adjust the weights.
+
+### 2.1-c
+
+```{r}
+model3 <- keras_model_sequential() %>%
+  layer_dense(units = 12, activation="relu", input_shape=c(7)) %>%
+  layer_dense(units = 4, activation="softmax")
+
+model3 %>% compile(
+  optimizer = 'adam', 
+  loss = 'categorical_crossentropy',
+  metrics = c('accuracy'))
+
+model3 %>% fit(
+  data.matrix(X_train), 
+  y_train.ohe,
+  epochs=100,
+  batch_size=32,
+  validation_split=0.20
+)
+
+mod2 <- model3 %>% evaluate(as.matrix(X_test), y_test.ohe)
+
+loss2 <- mod2[1]
+accuracy3 <- mod2[2]
+
+
+pred.prob2 <- predict(model3, as.matrix(X_test))
+pred.class2 <- apply(pred.prob2, 1, function(x) which.max(x)-1) 
+
+confMatrix3 <- confusionMatrix(as.factor(pred.class2), as.factor(y_test))
+confMatrix3
+
+
+```
+
+### 2.1-c-i
+```{r}
+cat("Best model has 12 neurons in the hidden layer", "\nIn this model, loss: ", loss2 , ", Accuracy: ", accuracy3)
+```
+### 2.1-c-ii
+
+The bias of this model is just right since it is more accurate with a lower bias in order to have more accurate weights to predict the values. A higher bias is used to compensate for a lack of weights in order to attempt to get the class to the desired class.
+
+### 2.1-c-iii
+
+Based on the graph or accuracy and validation we should stop training at epoch 92 in order to achieve the accuracy of 90% and above for the accuracy and val_accuracy.
+
+# 2.1-d
+
+```{r}
+x2 <- confMatrix3[["byClass"]]
+sensitivity2 <- x2[1:4]
+specificity2 <- x2[5:8]
+ppv2 <- x2[9:12]
+Bal_acc2 <- x2[41:44]
+accuracy4 <- confMatrix3$overall['Accuracy']
+
+cat("      Best Neural Network Model \n\t Overall accuracy:", accuracy4, "\n\t Sensitivity Class 1:", sensitivity2[1], "Class 2:", sensitivity2[2], "\n\t             Class 3:", sensitivity2[3], "Class 4:", sensitivity2[4], "\n\t Specificity Class 1:", specificity2[1], "Class 2:", specificity2[2], "\n\t\             Class 3:", specificity2[3], "Class 4:", specificity2[4],"\n\t PPV \t     Class 1:", ppv2[1], "Class 2:", ppv2[2], "\n\t             Class3: ", ppv2[3], "Class 4:", ppv2[4], "\n\t Bal. Acc.   Class 1:", Bal_acc2[1], "Class 2:", Bal_acc2[2], "\n\t             Class 3:", Bal_acc2[3], "Class 4:", Bal_acc2[4])
+
+
+
+```
+### 2.1-d-i
+
+Comparing the decision tree model to the Best Neural Network Model, the neural network model is more accurate compared to the Best Neural Network Model by a couple of percentages. Now both are fairly close in accuracy and values of Sensitivity, specificity, PPV and Bal. Acc. However the decision tree preforms better since it is better at non binary decisions and predictions, where as the the ANN is better at determining binary models.
+
+### 2.1-d-ii
+
+If I had to deploy one of these two models in production I would choose to produce the Best Neural Network Model since it has a better accuracy and also the Balance Accuracy is better under the neural network. However the neural network changes depending on the sample given.

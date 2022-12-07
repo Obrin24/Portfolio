@@ -1,0 +1,85 @@
+---
+title: "CS 422"
+author: "Gabriel Johnson, Artificial Intelligence Undergraduate"
+output:
+  html_document:
+    toc: yes
+    df_print: paged
+  html_notebook:
+    toc: yes
+    toc_float: yes
+---
+
+
+### Part 2.1-A-ii
+
+```{r}
+library(dplyr)
+library(psych)
+
+data.df <- read.csv('us-covid.csv', comment.char = "#") 
+data.df
+
+```
+
+### Part 2.1-ii.
+
+```{r}
+data.df <- select(data.df,-confirmed_deaths)
+data.df
+```
+
+### Part 2.1-iii.a
+
+```{r}
+decreasing <- arrange(data.df,desc(total_cases))
+head(decreasing)
+```
+
+### Part 2.1-iii.b
+
+```{r}
+decreasing.df <- arrange(data.df,desc(total_cases))
+tail(decreasing.df)
+```
+### Part 2.1-i.v.a
+
+```{r}
+correl <- select(data.df, -state, -level)
+pairs.panels(correl)
+```
+### Part 2.1-i.v.a
+Question: Why should we exclude the first two columns from correlation analysis?
+Answer: The reason we should exclude the first two columns is because of the fact in order to find correlation between the deaths of people and the number of cases, either if those cases are confirmed or probable or even have just been for the last 7 days. The state and level of infected people doesn't mean that the deaths of people is correlated with the case numbers. So it is makes more sense to exclude them to get more accurate data.
+
+### Part 2.1-i.v.b
+
+Question: Which pair of columns have the highest correlation?
+The columns which have the highest correlation is total_cases with total_Deaths which has a correlation value of 0.98. Which makes sense since it is finding that the total number of cases correlate more than just select cases with the total number of deaths. With this also total number of cases also has a high correlation with a value of 0.92 with cases_last_7_days. Which makes sense as well due to the fact that there would be more correlation between the number of cases in a smaller time span with the total number of cases.
+
+### Part 2.1-i.v.c
+
+Question: Which pair of columns have the lowest correlation?
+The pair of columns which have the lowest correlation is the correlation between cases_rate_per_100k and cases_last_7_days with a correlation value of 0.00. Which makes sense due to the fact that the one is comparing the amount of cases after only 7 days to case rates of 100k people. Which the two do not correlate nearly as much as for instance the correlation between cases_rate_per_100k and total cases. Even so the correlation is low since the rate in cases per 100k isn't as valuable as other case data.
+
+### Part 2.1-v.a
+
+```{r}
+x1 <- select(data.df,confirmed)
+x2 <- select(data.df,probable)
+y <- select(data.df,total_deaths)
+plot(data.df$confirmed+data.df$probable,data.df$total_deaths,type = "p",xlab="Confirmed and Probable Cases",ylab="Toal Deaths",main = "Confirmed and Probable cases vs Total Deaths")
+```
+### Part 2.1-v.b
+
+Question: As you see the plot, there appears to be an anomaly. Looking at the data, briefly describe the anomaly.
+The anomaly being that several states have a greater amount of confirmed and probable cases along with a higher number of total deaths, which are causing a skew in data and an anomaly in how the data is layed out.For instance some of the data shows that some states have low cases but higher deaths or the extreme of one data point which has the max amount of deaths recorded with a high amount of confirmed and probable cases. That there is more probable and confirmed cases then there are deaths which can be shown in a summary of the data.
+
+### Part 2.1-v.c
+```{r}
+summary(data.df)
+outliers <- filter(data.df,confirmed > 1082490 & probable > 246744)
+outliers <- select(outliers, -cases_last_7_days, -case_rate_per_100K, -level)
+print(outliers)
+
+```

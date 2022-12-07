@@ -1,0 +1,100 @@
+---
+title: "CS 422"
+author: "Gabriel Johnson, Artificial Intelligence Undergraduate"
+output:
+  html_document:
+    toc: yes
+    df_print: paged
+  html_notebook:
+    toc: yes
+    toc_float: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+### Part 2.1
+
+```{r}
+library(dplyr)
+library(psych)
+library(caret)
+library(ROCR)
+library(arules)
+
+options("digits"=3)
+```
+
+### Part 2.1-a
+
+```{r}
+tr_1k.df <- read.transactions('tr-1k-canonical.csv', sep=',')
+tr_5k.df <- read.transactions('tr-5k-canonical.csv', sep=',') 
+tr_20k.df <- read.transactions('tr-20k-canonical.csv', sep=',')
+tr_75k.df <- read.transactions('tr-75k-canonical.csv', sep=',') 
+
+```
+### Part 2.1-b
+```{r}
+f_is <- apriori(tr_1k.df, parameter=list(support=0.08, target="frequent itemsets"))
+inspect(sort(f_is, decreasing = T, by="support"))
+rm(f_is)
+```
+```{r}
+f_is2 <- apriori(tr_5k.df, parameter=list(support=0.09, target="frequent itemsets"))
+inspect(sort(f_is2, decreasing = T, by="support"))
+rm(f_is2)
+```
+
+```{r}
+f_is3 <- apriori(tr_20k.df, parameter=list(support=0.09, target="frequent itemsets"))
+inspect(sort(f_is3, decreasing = T, by="support"))
+rm(f_is3)
+```
+```{r}
+f_is4 <- apriori(tr_75k.df, parameter=list(support=0.09, target="frequent itemsets"))
+inspect(sort(f_is4, decreasing = T, by="support"))
+rm(f_is4)
+```
+```{r}
+rules <- apriori(tr_1k.df, parameter = list(support=0.001))
+summary(rules)
+inspect(head(rules, by="confidence"))
+```
+
+```{r}
+rules2 <- apriori(tr_5k.df, parameter = list(support=0.01))
+summary(rules2)
+inspect(head(rules2, by="confidence"))
+```
+
+```{r}
+rules3 <- apriori(tr_20k.df, parameter = list(support=0.001))
+summary(rules3)
+inspect(head(rules3, by="confidence"))
+```
+
+```{r}
+rules4 <- apriori(tr_75k.df, parameter = list(support=0.01))
+summary(rules4)
+inspect(head(rules4, by="confidence"))
+```
+
+
+### Part 2.1-c
+
+The number of transactions affect the number of rules and the support of those rules in a more drastic way. Since having more transactions allows us to figure out more comparisons and the ability to understand if something is more of an outlier. More transactions allow us to realize with my accuracy what is actually being bought the most and which rules are more relevant to a majority of people. However, also having too many transactions and cause there to be skews in the data.
+
+
+### Part 2.1-d
+
+### Part 2.1-d.i
+
+The most frequenctly purchased item out of the 75k transactions is Coffee Eclair. While the most purchased item set is 	{Green Tea, Lemon Cookie, Raspberry Cookie, Raspberry Lemonade}, with a high lift.
+
+### Part 2.1-d.ii
+
+TRhe least frequently purchased item out of 75k transactions is Gongolais Cookie.
+
+
+
