@@ -1,12 +1,16 @@
 ---
-  title: "Homework 7"
-output: 
+title: "CS 422"
+author: "Gabriel Johnson, Artificial Intelligence Undergraduate"
+output:
   html_document:
     toc: yes
     df_print: paged
   html_notebook:
     toc: yes
     toc_float: yes
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 ```{r}  
 library(keras)
@@ -18,7 +22,7 @@ library(rpart.plot)
 rm(list=ls())
 options(digits=2)
 # Set working directory as needed
-setwd("C:/Users/gabeb/Desktop/programming/CS 422 Homework/Gabriel,Johnson")
+setwd("C:/Users/gabeb/Desktop/programming/CS 422 Homework/Old Homework/Homework 7")
 
 df <- read.csv("wifi_localization.csv")
 
@@ -49,13 +53,6 @@ accuracy <- confMatrix$overall['Accuracy']
 cat("      Decision Tree Model \n\t Overall accuracy:", accuracy, "\n\t Sensitivity Class 1: ", sensitivity[1], "  Class 2:", sensitivity[2], "\n\t             Class 3:", sensitivity[3], "Class 4:", sensitivity[4], "\n\t Specificity Class 1:", specificity[1], "Class 2:", specificity[2], "\n\t\             Class 3:", specificity[3], "Class 4:", specificity[4],"\n\t PPV \t     Class 1:", ppv[1], "Class 2:", ppv[2], "\n\t             Class3: ", ppv[3], "Class 4:", ppv[4], "\n\t Bal. Acc.   Class 1:", Bal_acc[1], "Class 2:", Bal_acc[2], "\n\t             Class 3:", Bal_acc[3], "Class 4:", Bal_acc[4])
 ```
 ...
-
-# (b)
-# Note that in (b) either use a new variable to store the model, or null out
-# the variable that stored the model in (a) if you want to reuse that variable.
-# The reason is that if you don't null it out, the model in (b) will have
-# residual information left over from (a) and your results will not be quite
-# accurate.
 
 ```{r}
 
